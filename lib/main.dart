@@ -1,21 +1,22 @@
 import 'package:flutter/material.dart';
 import 'screens/home_screen.dart';
-import 'theme/app_theme.dart';
 
 void main() {
-  runApp(const CalendarDesignerApp());
+  runApp(const MyApp());
 }
 
-class CalendarDesignerApp extends StatelessWidget {
-  const CalendarDesignerApp({super.key});
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Advanced Calendar Designer',
-      theme: AppTheme.light,
-      home: const HomeScreen(),
+      title: 'Custom Calendar App',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: const LandingScreen(),
     );
   }
 }

@@ -14,78 +14,111 @@ class DesignerScreen extends StatefulWidget {
 
 class _DesignerScreenState extends State<DesignerScreen> {
   List<File> images = [];
-  List<TextItem> texts = []; // Multiple text boxes
+  List<TextItem> texts = [];
+  String userName = "Your Name";
+
   final ImagePicker _picker = ImagePicker();
 
-  // Add an image from gallery
   Future<void> addImage() async {
-    final XFile? picked = await _picker.pickImage(source: ImageSource.gallery);
-    if (picked != null) {
-      setState(() {
-        images.add(File(picked.path));
-      });
+    try {
+      final XFile? picked = await _picker.pickImage(source: ImageSource.gallery);
+      if (picked != null) {
+        setState(() {
+          images.add(File(picked.path));
+        });
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Failed to pick image: $e")),
+      );
     }
   }
 
-  // Add a new text box
   void addTextBox() {
     setState(() {
       texts.add(TextItem(
-        text: "New Text",
+        text: "Edit me",
         position: const Offset(50, 50),
         style: GoogleFonts.poppins(fontSize: 22, color: Colors.black),
       ));
     });
   }
 
+  Future<void> downloadPdf() async {
+    await PdfService.generateCalendarPdf(
+      images: images,
+      texts: texts,
+      userName: userName,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Design Your Calendar"),
+        backgroundColor: Colors.lightBlue.shade400,
+        title: Text(
+          "Design Your Calendar",
+          style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.picture_as_pdf),
-            onPressed: () async {
-              if (images.isEmpty && texts.isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Add images or text first!")),
-                );
-                return;
-              }
-              await PdfService.generateCalendar(images, texts);
-            },
+            tooltip: "Download PDF",
+            onPressed: downloadPdf,
           ),
         ],
       ),
       body: Column(
         children: [
           Expanded(
-            child: DesignCanvas(
-              images: images,
-              texts: texts,
+            child: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: DesignCanvas(
+                images: images,
+                texts: texts,
+                userName: userName,
+              ),
             ),
           ),
-          const SizedBox(height: 10),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             child: Row(
               children: [
                 ElevatedButton.icon(
                   onPressed: addImage,
                   icon: const Icon(Icons.image),
                   label: const Text("Add Image"),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.cyan.shade300,
+                  ),
                 ),
                 const SizedBox(width: 10),
                 ElevatedButton.icon(
                   onPressed: addTextBox,
                   icon: const Icon(Icons.text_fields),
                   label: const Text("Add Text"),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.orange.shade300,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: TextField(
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      labelText: "Your Name",
+                      filled: true,
+                      fillColor: Colors.grey.shade100,
+                    ),
+                    onChanged: (val) => setState(() => userName = val),
+                  ),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 10),
         ],
       ),
     );
