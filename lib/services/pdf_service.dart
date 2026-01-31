@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/widgets.dart' as pw;
+import 'package:pdf/pdf.dart'; // <-- important for PdfColor and PdfColors
 import 'package:printing/printing.dart';
 import 'package:flutter/material.dart';
 import '../widgets/design_canvas.dart'; // For TextItem
@@ -18,7 +19,7 @@ class PdfService {
               // IMAGES
               for (int i = 0; i < images.length; i++)
                 pw.Positioned(
-                  left: 50, // example static offset
+                  left: 50,
                   top: 50.0 + i * 160,
                   child: pw.Image(
                     pw.MemoryImage(images[i].readAsBytesSync()),
@@ -51,14 +52,13 @@ class PdfService {
     final file = File("${dir.path}/calendar.pdf");
     await file.writeAsBytes(await pdf.save());
 
-    // Share PDF
     await Printing.sharePdf(bytes: await file.readAsBytes(), filename: 'calendar.pdf');
   }
 
   // Map Flutter Color to Pdf Color
-  static pw.PdfColor _mapColor(Color? color) {
-    if (color == null) return pw.PdfColors.black;
-    return pw.PdfColor.fromInt(color.value);
+  static PdfColor _mapColor(Color? color) {
+    if (color == null) return PdfColors.black;
+    return PdfColor.fromInt(color.value);
   }
 
   // Map Flutter FontWeight to Pdf FontWeight
